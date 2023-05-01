@@ -12,6 +12,8 @@
 ***
 ## اسکریپت
 
+sudo wget https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.sh && chmod +x gost.sh && ./gost.sh
+
 * شروع اسکریپت
    `wget --no-check-certificate -O gost.sh https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh && chmod +x gost.sh && ./gost.sh`
 * برای اجرای مجدد این اسکریپت، کافیست «./gost.sh» را وارد کرده و Enter را فشار دهید
