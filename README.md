@@ -1,53 +1,53 @@
-# Multi-EasyGost一键脚本使用指南
+# راهنمای استفاده از اسکریپت با یک کلیک Multi-EasyGost
 ***
-## 感谢: 
-1. 感谢 @ginuerzh 大佬开发的 [gost](https://github.com/ginuerzh/gost) 隧道程序 ，功能强大使用简单，想要详细了解的朋友可以查看[官方文档](https://docs.ginuerzh.xyz/gost/)
-2. 感谢 @风萧萧兮易水寒 大佬的[原始脚本](https://www.fiisi.com/?p=125)
-3. 感谢 @ STSDUST 提供的EasyGost脚本（已删库），此脚本是基于其进行修改增强
+## ممنون:
+1. با تشکر از برنامه تونل [gost](https://github.com/ginuerzh/gost) که توسط @ginuerzh توسعه یافته است. استفاده از آن قدرتمند و آسان است. دوستانی که می خواهند بیشتر بدانند می توانند [سند رسمی] را بررسی کنند. https://docs.ginuerzh.xyz/gost/)
+2. با تشکر از @风晓晓易易水寒 برای [اسکریپت اصلی] (https://www.fiisi.com/?p=125)
+3. به لطف اسکریپت EasyGost که توسط @STSDUST (کتابخانه حذف شده) ارائه شده است، این اسکریپت بر اساس آن اصلاح و بهبود یافته است.
 ***
-## 简介
+## معرفی
 
-> 项目地址及帮助文档:  
+> آدرس پروژه و مستندات راهنما:
 > https://github.com/KANIKIG/Multi-EasyGost
 ***
-## 脚本
+## اسکریپت
 
-* 启动脚本  
-  `wget --no-check-certificate -O gost.sh https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh && chmod +x gost.sh && ./gost.sh`  
-* 再次运行本脚本只需要输入`./gost.sh`回车即可  
+* شروع اسکریپت
+   `wget --no-check-certificate -O gost.sh https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh && chmod +x gost.sh && ./gost.sh`
+* برای اجرای مجدد این اسکریپت، کافیست «./gost.sh» را وارد کرده و Enter را فشار دهید
 
-> 注：由于 gost v2.11.2 功能稳定，此脚本将一直采用该版本，后续不再跟随官方更新
+> توجه: از آنجایی که عملکرد gost v2.11.2 پایدار است، این اسکریپت همیشه از این نسخه استفاده می کند و در آینده به روز رسانی رسمی را دنبال نخواهد کرد.
 
-## 功能
+## تابع
 
-### 原脚本功能
+### تابع اسکریپت اصلی
 
-- 实现了systemd及gost配置文件对gost进行管理
-- 在不借助其他工具(如screen)的情况下实现多条转发规则同时生效
-- 机器reboot后转发不失效
-- 支持传输类型：
-  - tcp+udp不加密转发
-  -  relay+tls加密
+- پیاده سازی فایل های پیکربندی systemd و gost برای مدیریت gost
+- فعال کردن چندین قانون ارسال به طور همزمان بدون استفاده از ابزارهای دیگر (مانند صفحه نمایش)
+- پس از راه اندازی مجدد دستگاه، حمل و نقل خراب نمی شود
+- انواع انتقال پشتیبانی شده:
+   - ارسال tcp+udp بدون رمزگذاری
+   - رمزگذاری رله + tls
 
-### 此脚本新增功能
+### چه چیزی در این اسکریپت جدید است
 
-- 增加了传输类型选择功能
-- 新支持传输类型
-  - relay+ws
-  - relay+wss
-- 落地机一键创建ss/socks5/http代理 (gost内置)
-- 支持多传输类型的多落地简单型均衡负载
-- 增加gost国内加速下载镜像
-- 简单创建或删除gost定时重启任务
-- 脚本自动检查更新
-- 转发CDN自选节点ip
-- 支持自定义tls证书，落地可一键申请证书，中转可开启证书校验
+- اضافه شدن تابع انتخاب نوع انتقال
+- انواع حمل و نقل پشتیبانی شده جدید
+   - رله + ws
+   - رله + wss
+- ایجاد پروکسی ss/socks5/http با یک کلیک روی دستگاه کف (گوست داخلی)
+- متعادل کننده بار ساده چند قطره که از چندین نوع انتقال پشتیبانی می کند
+- اضافه کردن آینه دانلود شتاب داخلی gost
+- ایجاد یا حذف ساده وظایف راه اندازی مجدد برنامه ریزی شده
+- اسکریپت برای بررسی خودکار به روز رسانی
+- آی پی گره خود انتخاب شده CDN را فوروارد کنید
+- از گواهی های سفارشی tls پشتیبانی کنید، می توانید هنگام فرود با یک کلیک برای گواهی درخواست دهید و می توانید تأیید گواهی را در حین حمل و نقل فعال کنید
 
-## 功能展示
+نمایش عملکرد ##
 
-![iShot2020-12-14下午05.42.23.png](https://i.loli.net/2020/12/14/q75PO6s2DMIcUKB.png)
+![iShot2020-12-14 PM 05.42.23.png](https://i.loli.net/2020/12/14/q75PO6s2DMIcUKB.png)
 
-![iShot2020-12-14下午05.42.39.png](https://i.loli.net/2020/12/14/vzpGlWmPtCrneOY.png)
+![iShot2020-12-14 PM 05.42.39.png](https://i.loli.net/2020/12/14/vzpGlWmPtCrneOY.png)
 
 ![2](https://i.loli.net/2020/10/16/fBHgwStVQxc821z.png)
 
@@ -55,6 +55,6 @@
 
 ![4](https://i.loli.net/2020/10/16/lt6uAzI5X7yYWhr.png)
 
-![iShot2020-12-14下午05.43.46.png](https://i.loli.net/2020/12/14/YjiFTMCKs8lANbI.png)
+![iShot2020-12-14 pm 05.43.46.png](https://i.loli.net/2020/12/14/YjiFTMCKs8lANbI.png)
 
-![iShot2020-12-14下午05.43.11.png](https://i.loli.net/2020/12/14/VIcQSsoUaqpzx5T.png)
+![iShot2020-12-14 PM 05.43.11.png](https://i.loli.net/2020/12/14/VIcQSsoUaqpzx5T.png)
