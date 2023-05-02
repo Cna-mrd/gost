@@ -780,9 +780,9 @@ function writeconf() {
   done
 }
 function show_all_conf() {
-  echo -e "                      GOST 配置                        "
+  echo -e "                      GOST peykarbandi                        "
   echo -e "--------------------------------------------------------"
-  echo -e "序号|方法\t    |本地端口\t|目的地地址:目的地端口"
+  echo -e "Number|Method\t|Local Port\t|Destination Address:Destination Port"
   echo -e "--------------------------------------------------------"
 
   count_line=$(awk 'END{print NR}' $raw_conf_path)
@@ -791,27 +791,27 @@ function show_all_conf() {
     eachconf_retrieve
 
     if [ "$is_encrypt" == "nonencrypt" ]; then
-      str="不加密中转"
+      str="haml va naghle bedone ramznegari"
     elif [ "$is_encrypt" == "encrypttls" ]; then
-      str=" tls隧道 "
+      str=" tls tonel "
     elif [ "$is_encrypt" == "encryptws" ]; then
-      str="  ws隧道 "
+      str="  ws tonel "
     elif [ "$is_encrypt" == "encryptwss" ]; then
-      str=" wss隧道 "
+      str=" wss tonel "
     elif [ "$is_encrypt" == "peerno" ]; then
-      str=" 不加密均衡负载 "
+      str=" moteadel konande bare tonel bedone ramznegari "
     elif [ "$is_encrypt" == "peertls" ]; then
-      str=" tls隧道均衡负载 "
+      str=" tls taadole bare tonel "
     elif [ "$is_encrypt" == "peerws" ]; then
-      str="  ws隧道均衡负载 "
+      str="  ws taadole bare tonel "
     elif [ "$is_encrypt" == "peerwss" ]; then
-      str=" wss隧道均衡负载 "
+      str=" wss taadole bare tonel "
     elif [ "$is_encrypt" == "decrypttls" ]; then
-      str=" tls解密 "
+      str=" tls ramz goshai "
     elif [ "$is_encrypt" == "decryptws" ]; then
-      str="  ws解密 "
+      str="  ws ramz goshai "
     elif [ "$is_encrypt" == "decryptwss" ]; then
-      str=" wss解密 "
+      str=" wss ramz goshai "
     elif [ "$is_encrypt" == "ss" ]; then
       str="   ss   "
     elif [ "$is_encrypt" == "socks" ]; then
@@ -819,11 +819,11 @@ function show_all_conf() {
     elif [ "$is_encrypt" == "http" ]; then
       str=" http "
     elif [ "$is_encrypt" == "cdnno" ]; then
-      str="不加密转发CDN"
+      str="ersale bedone ramznegari CDN"
     elif [ "$is_encrypt" == "cdnws" ]; then
-      str="ws隧道转发CDN"
+      str="ws ersale tonel CDN"
     elif [ "$is_encrypt" == "cdnwss" ]; then
-      str="wss隧道转发CDN"
+      str="wss ersale tonel CDN"
     else
       str=""
     fi
@@ -835,37 +835,37 @@ function show_all_conf() {
 
 cron_restart() {
   echo -e "------------------------------------------------------------------"
-  echo -e "gost定时重启任务: "
+  echo -e "kar rah andazi mojadad gost: "
   echo -e "-----------------------------------"
-  echo -e "[1] 配置gost定时重启任务"
-  echo -e "[2] 删除gost定时重启任务"
+  echo -e "[1] tanzim gost baraye rah andazi mojadad"
+  echo -e "[2] barname rizi mojadad gost ra hazf konid"
   echo -e "-----------------------------------"
-  read -p "请选择: " numcron
+  read -p "lotfan entekhab konid: " numcron
   if [ "$numcron" == "1" ]; then
     echo -e "------------------------------------------------------------------"
-    echo -e "gost定时重启任务类型: "
+    echo -e "barname rizi noe kare gost: "
     echo -e "-----------------------------------"
-    echo -e "[1] 每？小时重启"
-    echo -e "[2] 每日？点重启"
+    echo -e "[1] har ? saat rah andazi mojadad"
+    echo -e "[2] rozane ? rahandazi mojadad"
     echo -e "-----------------------------------"
-    read -p "请选择: " numcrontype
+    read -p "lotfan entekhab konid: " numcrontype
     if [ "$numcrontype" == "1" ]; then
       echo -e "-----------------------------------"
-      read -p "每？小时重启: " cronhr
+      read -p "har ? rah andazi mojadad: " cronhr
       echo "0 0 */$cronhr * * ? * systemctl restart gost" >>/etc/crontab
-      echo -e "定时重启设置成功！"
+      echo -e "tanzim mojadad zamanbandi shode ba movafaghiyat anjam shod！"
     elif [ "$numcrontype" == "2" ]; then
       echo -e "-----------------------------------"
-      read -p "每日？点重启: " cronhr
+      read -p "rozane ? rah andazi mojadad: " cronhr
       echo "0 0 $cronhr * * ? systemctl restart gost" >>/etc/crontab
-      echo -e "定时重启设置成功！"
+      echo -e "tanzim mojadad zamanbandi shode ba movafaghiyat anjam shod！"
     else
       echo "type error, please try again"
       exit
     fi
   elif [ "$numcron" == "2" ]; then
     sed -i "/gost/d" /etc/crontab
-    echo -e "定时重启任务删除完成！"
+    echo -e "rah andazi mojadad barname rizi hazf shode ast"
   else
     echo "type error, please try again"
     exit
@@ -876,12 +876,12 @@ update_sh() {
   ol_version=$(curl -L -s --connect-timeout 5 https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
   if [ -n "$ol_version" ]; then
     if [[ "$shell_version" != "$ol_version" ]]; then
-      echo -e "存在新版本，是否更新 [Y/N]?"
+      echo -e "noskhe jadid mojode [Y/N]?"
       read -r update_confirm
       case $update_confirm in
       [yY][eE][sS] | [yY])
         wget -N --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.sh
-        echo -e "更新完成"
+        echo -e "berozresani kamel shod"
         exit 0
         ;;
       *) ;;
@@ -891,14 +891,14 @@ update_sh() {
       echo -e "                 ${Green_font_prefix}CNA MRD！${Font_color_suffix}"
     fi
   else
-    echo -e "                 ${Red_font_prefix}akharin noskhe ra daryaft konid (سینا)${Font_color_suffix}"
+    echo -e "                 ${Red_font_prefix}akharin noskhe ra daryaft konid (------- CNA MRD --------)${Font_color_suffix}"
   fi
 }
 
 update_sh
-echo && echo -e "                 gost eskript nasb ba yek click"${Red_font_prefix}[${shell_version}]${Font_color_suffix}"
+echo && echo -e "                 gost script nasb ba yek click"${Red_font_prefix}[${shell_version}]${Font_color_suffix}"
   ----------- CNA MRD -----------
-ویژگی ها: (1) این اسکریپت از فایل های پیکربندی systemd و gost برای مدیریت gost استفاده می کند
+vizhegiha : (1) in script dar file haye  systemd va gost modiriyat mikonad
         (2)bedone niyaz be abzar digari(manand safhe namayesh)ghavanin forward be tor hamzaman
         (3)bad az rah andazi mojadad system dobare kar khod ra anjam midahad
   Function: (1) tcp+udp unencrypted forwarding, (2) Transit machine encrypted forwarding, (3) Landing machine decrypted docking forwarding
@@ -946,7 +946,7 @@ case "$num" in
   writeconf
   conflast
   systemctl restart gost
-  echo -e "配置已生效，当前配置如下"
+  echo -e "peykarbandi emal shode be shekle zir ast"
   echo -e "--------------------------------------------------------"
   show_all_conf
   ;;
@@ -955,7 +955,7 @@ case "$num" in
   ;;
 9)
   show_all_conf
-  read -p "请输入你要删除的配置编号：" numdelete
+  read -p "lotfan shomare pekarbandi ke mikhahid hazf konid ra entekhab konid：" numdelete
   if echo $numdelete | grep -q '[0-9]'; then
     sed -i "${numdelete}d" $raw_conf_path
     rm -rf /etc/gost/config.json
@@ -963,9 +963,9 @@ case "$num" in
     writeconf
     conflast
     systemctl restart gost
-    echo -e "配置已删除，服务已重启"
+    echo -e "peykarbandi hazf shod , servise dobare rah andazi shod"
   else
-    echo "请输入正确数字"
+    echo "lotfan yek adad ra entekhab konid"
   fi
   ;;
 10)
@@ -975,6 +975,6 @@ case "$num" in
   cert
   ;;
 *)
-  echo "请输入正确数字 [1-9]"
+  echo "lotfan yek adad ra entekhab konid [1-9]"
   ;;
 esac
