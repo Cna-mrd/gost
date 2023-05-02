@@ -888,7 +888,7 @@ update_sh() {
 
       esac
     else
-      echo -e "                 ${Green_font_prefix}CNA MRD！${Font_color_suffix}" 
+      echo -e "                 ${Green_font_prefix}CNA MRD！${Font_color_suffix}"
     fi
   else
     echo -e "                 ${Red_font_prefix}akharin noskhe ra daryaft konid (------- CNA MRD --------)${Font_color_suffix}"
