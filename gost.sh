@@ -66,9 +66,9 @@ function check_new_ver() {
   ct_new_ver=$(wget --no-check-certificate -qO- -t2 -T3 https://api.github.com/repos/ginuerzh/gost/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g;s/v//g')
   if [[ -z ${ct_new_ver} ]]; then
     ct_new_ver="2.11.2"
-    echo -e "${Error} gost 最新版本获取失败，正在下载v${ct_new_ver}版"
+    echo -e "${Error} gost akharin noskhe daryaft nashod，Downloading version v${ct_new_ver}"
   else
-    echo -e "${Info} gost 目前最新版本为 ${ct_new_ver}"
+    echo -e "${Info} gost Currently the latest version is ${ct_new_ver}"
   fi
 }
 function check_file() {
@@ -92,8 +92,8 @@ function Install_ct() {
   check_file
   check_sys
   # check_new_ver
-  echo -e "若为国内机器建议使用大陆镜像加速下载"
-  read -e -p "是否使用？[y/n]:" addyn
+  echo -e "If it is a domestic machine, it is recommended to use the mainland mirror to speed up the download"
+  read -e -p "estefade konid ya na？[y/n]:" addyn
   [[ -z ${addyn} ]] && addyn="n"
   if [[ ${addyn} == [Yy] ]]; then
     rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
@@ -119,12 +119,12 @@ function Install_ct() {
   systemctl enable gost && systemctl restart gost
   echo "------------------------------"
   if test -a /usr/bin/gost -a /usr/lib/systemctl/gost.service -a /etc/gost/config.json; then
-    echo "gost安装成功"
+    echo "gost ba movafaghiyat nasb shod"
     rm -rf "$(pwd)"/gost
     rm -rf "$(pwd)"/gost.service
     rm -rf "$(pwd)"/config.json
   else
-    echo "gost没有安装成功"
+    echo "gost nasb nashod"
     rm -rf "$(pwd)"/gost
     rm -rf "$(pwd)"/gost.service
     rm -rf "$(pwd)"/config.json
@@ -136,15 +136,15 @@ function Uninstall_ct() {
   rm -rf /usr/lib/systemd/system/gost.service
   rm -rf /etc/gost
   rm -rf "$(pwd)"/gost.sh
-  echo "gost已经成功删除"
+  echo "gost hazf shod"
 }
 function Start_ct() {
   systemctl start gost
-  echo "已启动"
+  echo "faal shod"
 }
 function Stop_ct() {
   systemctl stop gost
-  echo "已停止"
+  echo "motevaghef shod"
 }
 function Restart_ct() {
   rm -rf /etc/gost/config.json
@@ -152,32 +152,32 @@ function Restart_ct() {
   writeconf
   conflast
   systemctl restart gost
-  echo "已重读配置并重启"
+  echo "peykar bandi ra dobare bekhanid va rah andazi konid"
 }
 function read_protocol() {
-  echo -e "请问您要设置哪种功能: "
+  echo -e "che noe tabei ra tanzim mikonid: "
   echo -e "-----------------------------------"
-  echo -e "[1] tcp+udp流量转发, 不加密"
-  echo -e "说明: 一般设置在国内中转机上"
+  echo -e "[1] tcp+udp ersale terafik bedon ramznegari"
+  echo -e "namayesh: tranzite dakheli"
   echo -e "-----------------------------------"
-  echo -e "[2] 加密隧道流量转发"
-  echo -e "说明: 用于转发原本加密等级较低的流量, 一般设置在国内中转机上"
-  echo -e "     选择此协议意味着你还有一台机器用于接收此加密流量, 之后须在那台机器上配置协议[3]进行对接"
+  echo -e "[2] haml va naghle trafik tonel zamznegari"
+  echo -e "namayesh: Used to forward traffic that was originally encrypted at a lower level, tranzite dakheli"
+  echo -e "     entekhab in protokol be mani in ast shoma baraye daryaft in trafik ramzgozari shode, sepas protokol bayad roye an tanzim shavad[3]langar andakhtan"
   echo -e "-----------------------------------"
-  echo -e "[3] 解密由gost传输而来的流量并转发"
-  echo -e "说明: 对于经由gost加密中转的流量, 通过此选项进行解密并转发给本机的代理服务端口或转发给其他远程机器"
-  echo -e "      一般设置在用于接收中转流量的国外机器上"
+  echo -e "[3] Decrypt the traffic transmitted by gost and forward it"
+  echo -e "namayesh: For traffic encrypted by gost, Use this option to decrypt and forward to the proxy service port of this machine or forward to other remote machines"
+  echo -e "      It is generally set on foreign machines used to receive transit traffic"
   echo -e "-----------------------------------"
-  echo -e "[4] 一键安装ss/socks5/http代理"
-  echo -e "说明: 使用gost内置的代理协议，轻量且易于管理"
+  echo -e "[4] One-click install ss/socks5/http proxy"
+  echo -e "namayesh: Use gost's built-in proxy protocol，Lightweight and easy to manage"
   echo -e "-----------------------------------"
-  echo -e "[5] 进阶：多落地均衡负载"
-  echo -e "说明: 支持各种加密方式的简单均衡负载"
+  echo -e "[5] pishrafte ：Multiple landings to balance the load"
+  echo -e "namayesh: Simple load balancing that supports various encryption methods"
   echo -e "-----------------------------------"
-  echo -e "[6] 进阶：转发CDN自选节点"
-  echo -e "说明: 只需在中转机设置"
+  echo -e "[6] pishrafte ：Forwarding CDN self-selected nodes"
+  echo -e "namayesh: Just set up in transit"
   echo -e "-----------------------------------"
-  read -p "请选择: " numprotocol
+  read -p "lotfan entekhab konid: " numprotocol
 
   if [ "$numprotocol" == "1" ]; then
     flag_a="nonencrypt"
@@ -199,23 +199,23 @@ function read_protocol() {
 function read_s_port() {
   if [ "$flag_a" == "ss" ]; then
     echo -e "-----------------------------------"
-    read -p "请输入ss密码: " flag_b
+    read -p "please enter ss password: " flag_b
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
-    read -p "请输入socks密码: " flag_b
+    read -p "Please enter the socks password: " flag_b
   elif [ "$flag_a" == "http" ]; then
     echo -e "-----------------------------------"
-    read -p "请输入http密码: " flag_b
+    read -p "please enter http password: " flag_b
   else
     echo -e "------------------------------------------------------------------"
-    echo -e "请问你要将本机哪个端口接收到的流量进行转发?"
-    read -p "请输入: " flag_b
+    echo -e "kodam port ra mikhahid trafik daryafti tavasot in dastgah ra forward konid ?"
+    read -p "lotfan vared konid: " flag_b
   fi
 }
 function read_d_ip() {
   if [ "$flag_a" == "ss" ]; then
     echo -e "------------------------------------------------------------------"
-    echo -e "请问您要设置的ss加密(仅提供常用的几种): "
+    echo -e "May I ask the ss encryption you want to set(Only a few commonly used): "
     echo -e "-----------------------------------"
     echo -e "[1] aes-256-gcm"
     echo -e "[2] aes-256-cfb"
@@ -224,7 +224,7 @@ function read_d_ip() {
     echo -e "[5] rc4-md5"
     echo -e "[6] AEAD_CHACHA20_POLY1305"
     echo -e "-----------------------------------"
-    read -p "请选择ss加密方式: " ssencrypt
+    read -p "Please choose ss encryption method: " ssencrypt
 
     if [ "$ssencrypt" == "1" ]; then
       flag_c="aes-256-gcm"
@@ -244,33 +244,34 @@ function read_d_ip() {
     fi
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
-    read -p "请输入socks用户名: " flag_c
+    read -p "Please enter the socks username: " flag_c
   elif [ "$flag_a" == "http" ]; then
     echo -e "-----------------------------------"
-    read -p "请输入http用户名: " flag_c
+    read -p "Please enter http username: " flag_c
   elif [[ "$flag_a" == "peer"* ]]; then
     echo -e "------------------------------------------------------------------"
-    echo -e "请输入落地列表文件名"
-    read -e -p "自定义但不同配置应不重复，不用输入后缀，例如ips1、iplist2: " flag_c
+    echo -e "Please enter the landing list file name"
+    read -e -p "Custom but different configurations should not be repeated，no suffix，For example ips1、iplist2: " flag_c
     touch $flag_c.txt
     echo -e "------------------------------------------------------------------"
-    echo -e "请依次输入你要均衡负载的落地ip与端口"
+    echo -e "Please enter the landing ip and port you want to balance the load in turn"
     while true; do
-      echo -e "请问你要将本机从${flag_b}接收到的流量转发向的IP或域名?"
-      read -p "请输入: " peer_ip
-      echo -e "请问你要将本机从${flag_b}接收到的流量转发向${peer_ip}的哪个端口?"
-      read -p "请输入: " peer_port
+      echo -e "Would you like to switch this unit from${flag_b}The IP or domain name to which the received traffic is forwarded?"
+      read -p "vared konid: " peer_ip
+      echo -e "Would you like to switch this unit from${flag_b}Received traffic is forwarded to${peer_ip}Which port of?"
+      read -p "vared konid: " peer_port
       echo -e "$peer_ip:$peer_port" >>$flag_c.txt
-      read -e -p "是否继续添加落地？[Y/n]:" addyn
+      read -e -p "Whether to continue to add landing？[Y/n]:" addyn
       [[ -z ${addyn} ]] && addyn="y"
       if [[ ${addyn} == [Nn] ]]; then
         echo -e "------------------------------------------------------------------"
-        echo -e "已在root目录创建$flag_c.txt，您可以随时编辑该文件修改落地信息，重启gost即可生效"
+        echo -e "$flag_c.txt has been created in the root directory, you can edit this file"
+		echo -e " at any time to modify the landing information, restart gost to take effect"
         echo -e "------------------------------------------------------------------"
         break
       else
         echo -e "------------------------------------------------------------------"
-        echo -e "继续添加均衡负载落地配置"
+        echo -e "Continue to add balanced load landing configuration"
       fi
     done
   elif [[ "$flag_a" == "cdn"* ]]; then
