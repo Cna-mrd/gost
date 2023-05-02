@@ -896,9 +896,9 @@ update_sh() {
 }
 
 update_sh
-echo && echo -e "                 gost 一键安装配置脚本"${Red_font_prefix}[${shell_version}]${Font_color_suffix}"
-  ----------- KANIKIG -----------
-  特性: (1)本脚本采用systemd及gost配置文件对gost进行管理
+echo && echo -e "                 gost eskript nasb ba yek click"${Red_font_prefix}[${shell_version}]${Font_color_suffix}"
+  ----------- CNA MRD -----------
+ویژگی ها: (1) این اسکریپت از فایل های پیکربندی systemd و gost برای مدیریت gost استفاده می کند
         (2)能够在不借助其他工具(如screen)的情况下实现多条转发规则同时生效
         (3)机器reboot后转发不失效
   功能: (1)tcp+udp不加密转发, (2)中转机加密转发, (3)落地机解密对接转发
