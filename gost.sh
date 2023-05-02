@@ -857,7 +857,7 @@ done < "$raw_conf_path"
 
     echo -e " $i  |$str  |$s_port\t|$d_ip:$d_port"
     echo -e "--------------------------------------------------------"
-  done
+  
 }
 
 cron_restart() {
