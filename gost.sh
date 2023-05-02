@@ -888,10 +888,10 @@ update_sh() {
 
       esac
     else
-      echo -e "                 ${Green_font_prefix}当前版本为最新版本！${Font_color_suffix}"
+      echo -e "                 ${Green_font_prefix}CNA MRD！${Font_color_suffix}"
     fi
   else
-    echo -e "                 ${Red_font_prefix}脚本最新版本获取失败，请检查与github的连接！${Font_color_suffix}"
+    echo -e "                 ${Red_font_prefix}akharin noskhe ra daryaft konid (سینا)${Font_color_suffix}"
   fi
 }
 
