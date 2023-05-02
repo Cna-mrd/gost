@@ -1,16 +1,16 @@
 #! /bin/bash
 Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
-Info="${Green_font_prefix}[信息]${Font_color_suffix}"
-Error="${Red_font_prefix}[错误]${Font_color_suffix}"
+Info="${Green_font_prefix}[etelaat]${Font_color_suffix}"
+Error="${Red_font_prefix}[eshtebah]${Font_color_suffix}"
 shell_version="1.1.1"
-ct_new_ver="2.11.2" # 2.x 不再跟随官方更新
+ct_new_ver="2.11.2" # 2.x donbal nakardan berozresani
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 function checknew() {
   checknew=$(gost -V 2>&1 | awk '{print $2}')
   # check_new_ver
-  echo "你的gost版本为:""$checknew"""
-  echo -n 是否更新\(y/n\)\:
+  echo "behtarin noskhe:""$checknew"""
+  echo -n berozresani?\(y/n\)\:
   read checknewnum
   if test $checknewnum = "y"; then
     cp -r /etc/gost /tmp/
@@ -40,7 +40,7 @@ function check_sys() {
   fi
   bit=$(uname -m)
   if test "$bit" != "x86_64"; then
-    echo "请输入你的芯片架构，/386/armv5/armv6/armv7/armv8"
+    echo "tarashe cpu khod ra entekhab konid，/386/armv5/armv6/armv7/armv8"
     read bit
   else
     bit="amd64"
@@ -59,7 +59,7 @@ function Installation_dependency() {
   fi
 }
 function check_root() {
-  [[ $EUID != 0 ]] && echo -e "${Error} 当前非ROOT账号(或没有ROOT权限)，无法继续操作，请更换ROOT账号或使用 ${Green_background_prefix}sudo su${Font_color_suffix} 命令获取临时ROOT权限（执行后可能会提示输入当前账号的密码）。" && exit 1
+  [[ $EUID != 0 ]] && echo -e "${Error} hesab root nist(user root nist)，nemitavan edame dad，lotfan az root estefade konid ${Green_background_prefix}sudo su${Font_color_suffix} shayad az shoma hesab root va ramz bekhahad" && exit 1
 }
 function check_new_ver() {
   # deprecated
@@ -97,13 +97,13 @@ function Install_ct() {
   [[ -z ${addyn} ]] && addyn="n"
   if [[ ${addyn} == [Yy] ]]; then
     rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
-    wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/gost-linux-"$bit"-"$ct_new_ver".gz
+	wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v${ct_new_ver}/gost-linux-${bit}-v${ct_new_ver}.gz
     gunzip gost-linux-"$bit"-"$ct_new_ver".gz
     mv gost-linux-"$bit"-"$ct_new_ver" gost
     mv gost /usr/bin/gost
     chmod -R 777 /usr/bin/gost
-    wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
-    mkdir /etc/gost && wget --no-check-certificate https://gotunnel.oss-cn-shenzhen.aliyuncs.com/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
+	wget --no-check-certificate https://raw.githubusercontent.com/ginuerzh/gost/master/examples/systemd/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
+	mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/ginuerzh/gost/master/examples/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
   else
     rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
     wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v"$ct_new_ver"/gost-linux-"$bit"-"$ct_new_ver".gz
@@ -111,9 +111,10 @@ function Install_ct() {
     mv gost-linux-"$bit"-"$ct_new_ver" gost
     mv gost /usr/bin/gost
     chmod -R 777 /usr/bin/gost
-    wget --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
-    mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
-  fi
+	
+    wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
+    mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
+ fi
 
   systemctl enable gost && systemctl restart gost
   echo "------------------------------"
@@ -296,7 +297,7 @@ function read_d_ip() {
     echo -e "------------------------------------------------------------------"
     echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
     echo -e "注: IP既可以是[远程机器/当前机器]的公网IP, 也可是以本机本地回环IP(即127.0.0.1)"
-    echo -e "具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/KANIKIG/Multi-EasyGost)"
+    echo -e "具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/Cna-mrd/gost)"
     if [[ ${is_cert} == [Yy] ]]; then
       echo -e "注意: 落地机开启自定义tls证书，务必填写${Red_font_prefix}域名${Font_color_suffix}"
     fi
@@ -872,14 +873,14 @@ cron_restart() {
 }
 
 update_sh() {
-  ol_version=$(curl -L -s --connect-timeout 5 https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
+  ol_version=$(curl -L -s --connect-timeout 5 https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.sh | grep "shell_version=" | head -1 | awk -F '=|"' '{print $3}')
   if [ -n "$ol_version" ]; then
     if [[ "$shell_version" != "$ol_version" ]]; then
       echo -e "存在新版本，是否更新 [Y/N]?"
       read -r update_confirm
       case $update_confirm in
       [yY][eE][sS] | [yY])
-        wget -N --no-check-certificate https://raw.githubusercontent.com/KANIKIG/Multi-EasyGost/master/gost.sh
+        wget -N --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.sh
         echo -e "更新完成"
         exit 0
         ;;
@@ -901,7 +902,7 @@ echo && echo -e "                 gost 一键安装配置脚本"${Red_font_prefi
         (2)能够在不借助其他工具(如screen)的情况下实现多条转发规则同时生效
         (3)机器reboot后转发不失效
   功能: (1)tcp+udp不加密转发, (2)中转机加密转发, (3)落地机解密对接转发
-  帮助文档：https://github.com/KANIKIG/Multi-EasyGost
+  帮助文档：https://github.com/Cna-mrd/gost
 
  ${Green_font_prefix}1.${Font_color_suffix} 安装 gost
  ${Green_font_prefix}2.${Font_color_suffix} 更新 gost
