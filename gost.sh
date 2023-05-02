@@ -785,48 +785,75 @@ function show_all_conf() {
   echo -e "Number|Method\t|Local Port\t|Destination Address:Destination Port"
   echo -e "--------------------------------------------------------"
 
-  count_line=$(awk 'END{print NR}' $raw_conf_path)
-  for ((i = 1; i <= $count_line; i++)); do
-    trans_conf=$(sed -n "${i}p" $raw_conf_path)
-    eachconf_retrieve
+ if [ ! -s "$raw_conf_path" ]; then
+  echo "Error: Configuration file is empty or does not exist"
+  exit 1
+fi
 
-    if [ "$is_encrypt" == "nonencrypt" ]; then
+count_line=$(awk 'END{print NR}' "$raw_conf_path")
+
+while read -r line
+do
+  is_encrypt=$(echo "$line" | awk -F "=" '{print $2}')
+  case "$is_encrypt" in
+    "nonencrypt")
       str="haml va naghle bedone ramznegari"
-    elif [ "$is_encrypt" == "encrypttls" ]; then
+      ;;
+    "encrypttls")
       str=" tls tonel "
-    elif [ "$is_encrypt" == "encryptws" ]; then
+      ;;
+    "encryptws")
       str="  ws tonel "
-    elif [ "$is_encrypt" == "encryptwss" ]; then
+      ;;
+    "encryptwss")
       str=" wss tonel "
-    elif [ "$is_encrypt" == "peerno" ]; then
+      ;;
+    "peerno")
       str=" moteadel konande bare tonel bedone ramznegari "
-    elif [ "$is_encrypt" == "peertls" ]; then
+      ;;
+    "peertls")
       str=" tls taadole bare tonel "
-    elif [ "$is_encrypt" == "peerws" ]; then
+      ;;
+    "peerws")
       str="  ws taadole bare tonel "
-    elif [ "$is_encrypt" == "peerwss" ]; then
+      ;;
+    "peerwss")
       str=" wss taadole bare tonel "
-    elif [ "$is_encrypt" == "decrypttls" ]; then
+      ;;
+    "decrypttls")
       str=" tls ramz goshai "
-    elif [ "$is_encrypt" == "decryptws" ]; then
+      ;;
+    "decryptws")
       str="  ws ramz goshai "
-    elif [ "$is_encrypt" == "decryptwss" ]; then
+      ;;
+    "decryptwss")
       str=" wss ramz goshai "
-    elif [ "$is_encrypt" == "ss" ]; then
+      ;;
+    "ss")
       str="   ss   "
-    elif [ "$is_encrypt" == "socks" ]; then
+      ;;
+    "socks")
       str=" socks5 "
-    elif [ "$is_encrypt" == "http" ]; then
+      ;;
+    "http")
       str=" http "
-    elif [ "$is_encrypt" == "cdnno" ]; then
+      ;;
+    "cdnno")
       str="ersale bedone ramznegari CDN"
-    elif [ "$is_encrypt" == "cdnws" ]; then
+      ;;
+    "cdnws")
       str="ws ersale tonel CDN"
-    elif [ "$is_encrypt" == "cdnwss" ]; then
+      ;;
+    "cdnwss")
       str="wss ersale tonel CDN"
-    else
+      ;;
+    *)
       str=""
-    fi
+      ;;
+  esac
+
+  eachconf_retrieve "$str"
+done < "$raw_conf_path"
 
     echo -e " $i  |$str  |$s_port\t|$d_ip:$d_port"
     echo -e "--------------------------------------------------------"
