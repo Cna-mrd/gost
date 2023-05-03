@@ -123,9 +123,9 @@ function Install_ct() {
   read -e -p "Are you in China? It is recommended to use domestic mirrors for faster download speeds. [y/n]: " addyn
   [[ -z ${addyn} ]] && addyn="n"
   if [[ ${addyn} =~ [Yy] ]]; then
-    curl -L -o gost-linux-amd64.gz http://openresty.tengine.taobao.org/download/gost-linux-amd64-latest.gz
+    curl -L -o gost-linux-amd64.gz https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-freebsd-amd64-2.11.5.gz
   else
-    curl -L -o gost-linux-amd64.gz https://github.com/ginuerzh/gost/releases/download/v2.11.2/gost-linux-amd64-2.11.2.gz
+    curl -L -o gost-linux-amd64.gz https://github.com/go-gost/gost/releases/download/v3.0.0-rc7/gost_3.0.0-rc7_linux_amd64.tar.gz
   fi
   gzip -d gost-linux-amd64.gz
   mv gost-linux-amd64 /usr/bin/gost
@@ -234,21 +234,20 @@ EOF
 
 
 function read_s_port() {
-  if [ "$flag_a" == "ss" ]; then
-    echo -e "-----------------------------------"
-    read -p "please enter ss password: " flag_b
-  elif [ "$flag_a" == "socks" ]; then
-    echo -e "-----------------------------------"
-    read -p "Please enter the socks password: " flag_b
-  elif [ "$flag_a" == "http" ]; then
-    echo -e "-----------------------------------"
-    read -p "please enter http password: " flag_b
-  else
-    echo -e "------------------------------------------------------------------"
-    echo -e "kodam port ra mikhahid trafik daryafti tavasot in dastgah ra forward konid ?"
-    read -p "lotfan vared konid: " flag_b
-  fi
+  case "$flag_a" in
+    ss|socks|http)
+      echo "-----------------------------------"
+      read -p "Please enter the password for $flag_a: " flag_b
+      ;;
+    *)
+      echo "------------------------------------------------------------------"
+      read -p "Please enter the port to receive forwarded traffic: " flag_b
+      ;;
+   esac
 }
+
+
+
 function read_d_ip() {
   if [ "$flag_a" == "ss" ]; then
     echo -e "------------------------------------------------------------------"
@@ -342,6 +341,9 @@ function read_d_ip() {
     read -p "请输入: " flag_c
   fi
 }
+
+
+
 function read_d_port() {
   if [ "$flag_a" == "ss" ]; then
     echo -e "------------------------------------------------------------------"
