@@ -1,4 +1,15 @@
 #! /bin/bash
+Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="\033[42;37m" && Font_color_suffix="\033[0m"
+Info="${Green_font_prefix}[etelaat]${Font_color_suffix}"
+Error="${Red_font_prefix}[eshtebah]${Font_color_suffix}"
+shell_version="1.1.1"
+ct_new_ver="2.11.2" # 2.x donbal nakardan berozresani
+gost_conf_path="/etc/gost/config.json"
+raw_conf_path="/etc/gost/rawconf"
+
+
+
+
 Info="\e[32m[etelaat]\e[0m"
 Error="\e[31m[eshtebah]\e[0m"
 shell_version="1.1.1"
@@ -7,8 +18,6 @@ gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
 echo -e "${Info} This is an information message."
 echo -e "${Error} This is an error message."
-
-
 
 
 function checknew() {
