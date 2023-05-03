@@ -36,29 +36,34 @@ function checknew() {
 
 
 function check_sys() {
+  # چک کردن توزیع لینوکسی
   if [[ -f /etc/redhat-release ]]; then
     release="centos"
-  elif cat /etc/issue | grep -q -E -i "debian"; then
+  elif grep -q -E -i "debian" /etc/issue; then
     release="debian"
-  elif cat /etc/issue | grep -q -E -i "ubuntu"; then
+  elif grep -q -E -i "ubuntu" /etc/issue; then
     release="ubuntu"
-  elif cat /etc/issue | grep -q -E -i "centos|red hat|redhat"; then
+  elif grep -q -E -i "centos|red hat|redhat" /etc/issue; then
     release="centos"
-  elif cat /proc/version | grep -q -E -i "debian"; then
+  elif grep -q -E -i "debian" /proc/version; then
     release="debian"
-  elif cat /proc/version | grep -q -E -i "ubuntu"; then
+  elif grep -q -E -i "ubuntu" /proc/version; then
     release="ubuntu"
-  elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
+  elif grep -q -E -i "centos|red hat|redhat" /proc/version; then
     release="centos"
   fi
+  
+  # چک کردن معماری CPU
   bit=$(uname -m)
-  if test "$bit" != "x86_64"; then
-    echo "tarashe cpu khod ra entekhab konid，/386/armv5/armv6/armv7/armv8"
-    read bit
+  if [[ "$bit" != "x86_64" ]]; then
+    read -p "Tarashe CPU khod ra entekhab konid: " bit
   else
     bit="amd64"
   fi
 }
+
+
+
 function Installation_dependency() {
   gzip_ver=$(gzip -V)
   if [[ -z ${gzip_ver} ]]; then
