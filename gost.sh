@@ -6,20 +6,6 @@ shell_version="1.1.1"
 ct_new_ver="2.11.2" # 2.x donbal nakardan berozresani
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
-
-
-
-
-Info="\e[32m[etelaat]\e[0m"
-Error="\e[31m[eshtebah]\e[0m"
-shell_version="1.1.1"
-ct_new_ver="2.11.2"
-gost_conf_path="/etc/gost/config.json"
-raw_conf_path="/etc/gost/rawconf"
-echo -e "${Info} This is an information message."
-echo -e "${Error} This is an error message."
-
-
 function checknew() {
   checknew=$(gost -V 2>&1 | awk '{print $2}')
   # check_new_ver
