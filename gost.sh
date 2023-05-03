@@ -248,32 +248,35 @@ function read_s_port() {
 
 
 
-function read_options() {
-  local options=("$@")
-  for i in "${!options[@]}"; do
-    echo "[$(($i+1))] ${options[$i]}"
-  done
-  echo "-----------------------------------"
-  read -p "Please enter your choice: " choice
-  while [[ -z "$choice" || "$choice" -gt "${#options[@]}" || "$choice" -lt 1 ]]; do
-    echo "Invalid input. Please try again."
-    read -p "Please enter your choice: " choice
-  done
-  echo ${options[$(($choice-1))]}
-}
-
-# Function to read dynamic IP
 function read_d_ip() {
-  # Reading user options for the ss encryption method
   if [ "$flag_a" == "ss" ]; then
-    echo "------------------------------------------------------------------"
-    echo "May I ask the ss encryption you want to set (Only a few commonly used): "
-    options=("aes-256-gcm" "aes-256-cfb" "chacha20-ietf-poly1305" "chacha20" "rc4-md5" "AEAD_CHACHA20_POLY1305")
-    flag_c=$(read_options "${options[@]}")
-  fi
-  
-  
-  
+    echo -e "------------------------------------------------------------------"
+    echo -e "May I ask the ss encryption you want to set(Only a few commonly used): "
+    echo -e "-----------------------------------"
+    echo -e "[1] aes-256-gcm"
+    echo -e "[2] aes-256-cfb"
+    echo -e "[3] chacha20-ietf-poly1305"
+    echo -e "[4] chacha20"
+    echo -e "[5] rc4-md5"
+    echo -e "[6] AEAD_CHACHA20_POLY1305"
+    echo -e "-----------------------------------"
+    read -p "Please choose ss encryption method: " ssencrypt
+    if [ "$ssencrypt" == "1" ]; then
+      flag_c="aes-256-gcm"
+    elif [ "$ssencrypt" == "2" ]; then
+      flag_c="aes-256-cfb"
+    elif [ "$ssencrypt" == "3" ]; then
+      flag_c="chacha20-ietf-poly1305"
+    elif [ "$ssencrypt" == "4" ]; then
+      flag_c="chacha20"
+    elif [ "$ssencrypt" == "5" ]; then
+      flag_c="rc4-md5"
+    elif [ "$ssencrypt" == "6" ]; then
+      flag_c="AEAD_CHACHA20_POLY1305"
+    else
+      echo "type error, please try again"
+      exit
+    fi
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
     read -p "Please enter the socks username: " flag_c
@@ -305,25 +308,22 @@ function read_d_ip() {
         echo -e "------------------------------------------------------------------"
         echo -e "Continue to add balanced load landing configuration"
       fi
-	  
-	  
-	  
     done
   elif [[ "$flag_a" == "cdn"* ]]; then
     echo -e "------------------------------------------------------------------"
-    echo -e "将本机从${flag_b}接收到的流量转发向的自选ip:"
-    read -p "请输入: " flag_c
-    echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
+    echo -e "Change the unit from${flag_b}The self-selected ip to which the received traffic is forwarded:"
+    read -p "please enter: " flag_c
+    echo -e "Would you like to switch this unit from${flag_b}Received traffic is forwarded to${flag_c}Which port of?"
     echo -e "[1] 80"
     echo -e "[2] 443"
-    echo -e "[3] 自定义端口（如8080等）"
-    read -p "请选择端口: " cdnport
+    echo -e "[3]Custom port (such as 8080, etc.)"
+    read -p "Please select a port: " cdnport
     if [ "$cdnport" == "1" ]; then
       flag_c="$flag_c:80"
     elif [ "$cdnport" == "2" ]; then
       flag_c="$flag_c:443"
     elif [ "$cdnport" == "3" ]; then
-      read -p "请输入自定义端口: " customport
+      read -p "Please enter a custom port: " customport
       flag_c="$flag_c:$customport"
     else
       echo "type error, please try again"
@@ -331,92 +331,129 @@ function read_d_ip() {
     fi
   else
     echo -e "------------------------------------------------------------------"
-    echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
-    echo -e "注: IP既可以是[远程机器/当前机器]的公网IP, 也可是以本机本地回环IP(即127.0.0.1)"
-    echo -e "具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/Cna-mrd/gost)"
+    echo -e "May I ask which IP or domain name you want to forward the traffic received by this machine from ${flag_b}?"
+    echo -e "Note: The IP can be either the public network IP of [remote machine/current machine], or the local loopback IP of this machine (ie 127.0.0.1)"
+    echo -e "Filling in the specific IP address depends on the IP that the service receiving the traffic is listening to (see: /Cna-mrd/gost)"
     if [[ ${is_cert} == [Yy] ]]; then
-      echo -e "注意: 落地机开启自定义tls证书，务必填写${Red_font_prefix}域名${Font_color_suffix}"
+      echo -e "Note: The landing machine opens a custom tls certificate, be sure to fill in ${Red_font_prefix} domain name ${Font_color_suffix}"
     fi
-    read -p "请输入: " flag_c
+    read -p "please enter: " flag_c
   fi
 }
 
 
 
 function read_d_port() {
-  if [ "$flag_a" == "ss" ]; then
-    echo -e "------------------------------------------------------------------"
-    echo -e "请问你要设置ss代理服务的端口?"
-    read -p "请输入: " flag_d
-  elif [ "$flag_a" == "socks" ]; then
-    echo -e "------------------------------------------------------------------"
-    echo -e "请问你要设置socks代理服务的端口?"
-    read -p "请输入: " flag_d
-  elif [ "$flag_a" == "http" ]; then
-    echo -e "------------------------------------------------------------------"
-    echo -e "请问你要设置http代理服务的端口?"
-    read -p "请输入: " flag_d
-  elif [[ "$flag_a" == "peer"* ]]; then
-    echo -e "------------------------------------------------------------------"
-    echo -e "您要设置的均衡负载策略: "
-    echo -e "-----------------------------------"
-    echo -e "[1] round - 轮询"
-    echo -e "[2] random - 随机"
-    echo -e "[3] fifo - 自上而下"
-    echo -e "-----------------------------------"
-    read -p "请选择均衡负载类型: " numstra
+  case "$flaga" in 
+    "ss")
+      printf "%s\n" "------------------------------------------------------------------" \
+        "May I ask which port you want to set for the SS proxy service?"
+      read -p "Please enter: " flagd
+      ;;
+    "socks")
+      printf "%s\n" "------------------------------------------------------------------" \
+        "May I ask which port you want to set for the SOCKS proxy service?"
+      read -p "Please enter: " flagd
+      ;;
+    "http")
+      printf "%s\n" "------------------------------------------------------------------" \
+        "May I ask which port you want to set for the HTTP proxy service?"
+      read -p "Please enter: " flagd
+      ;;
+    "peer")
+      printf "%s\n" "------------------------------------------------------------------" \
+        "Balancing load strategy: " \
+        "-----------------------------------" \
+        "[1] round - Round-robin" \
+        "[2] random - Random" \
+        "[3] fifo - First in, first out" \
+        "-----------------------------------"
+      read -p "Please select a load balancing type: " num_stra
+      case "$num_stra" in
+        "1")
+          flag_d="round"
+          ;;
+        "2")
+          flag_d="random"
+          ;;
+        "3")
+          flag_d="fifo"
+          ;;
+        )
+          echo "Type error, please try again"
+          exit
+          ;;
+      esac
+      ;;
+    "cdn")
+      printf "%s\n" "------------------------------------------------------------------" \
+        "Please enter the host:"
+      read -p "Please enter: " flag_d
+      ;;
+    )
+      printf "%s\n" "------------------------------------------------------------------" \
+        "May I ask which port you want to forward the traffic received by this machine from ${flagb} to ${flagc}?"
+      read -p "Please enter: " flagd
+      if [[ ${iscert} == Yy ]]; then
+        flagd="$flagd?secure=true"
+      fi
+      ;;
+  esac
+}
 
-    if [ "$numstra" == "1" ]; then
-      flag_d="round"
-    elif [ "$numstra" == "2" ]; then
-      flag_d="random"
-    elif [ "$numstra" == "3" ]; then
-      flag_d="fifo"
-    else
-      echo "type error, please try again"
-      exit
-    fi
-  elif [[ "$flag_a" == "cdn"* ]]; then
-    echo -e "------------------------------------------------------------------"
-    read -p "请输入host:" flag_d
+
+
+function eachconf_retrieve() {
+  d_server=${trans_conf#*#}
+  d_port=${d_server#*#}
+  d_ip=${d_server%%:*}
+  flag_s_port=${trans_conf%%#*}
+  is_encrypt=${flag_s_port%/*}
+  s_port=${flag_s_port##*/}
+}
+
+function confstart() {
+  printf "%s\n" "{
+    \"Debug\": true,
+    \"Retries\": 0," > "$gost_conf_path"
+  if [ "$multiconf" = true ]; then
+    echo -e "    \"ServeNodes\": [" >> "$gost_conf_path"
   else
-    echo -e "------------------------------------------------------------------"
-    echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
-    read -p "请输入: " flag_d
-    if [[ ${is_cert} == [Yy] ]]; then
-      flag_d="$flag_d?secure=true"
-    fi
+    echo -e "    \"ServeNodes\": [" >> "$gost_conf_path"
   fi
 }
-function writerawconf() {
-  echo $flag_a"/""$flag_b""#""$flag_c""#""$flag_d" >>$raw_conf_path
-}
+
 function rawconf() {
+  printf "%s\n\n" "+-----------------------------------+"
+  printf "%s\n" "| GOST Transport Layer Configuration |"
+  printf "%s\n\n" "+-----------------------------------+"
+  
   read_protocol
   read_s_port
   read_d_ip
   read_d_port
-  writerawconf
+  conf_json="{
+    \"protocol\": \"$flag_a\",
+    \"local_ip\": \"$flag_b\",
+    \"remote_ip\": \"$flag_c\",
+    \"remote_port\": \"$flag_d\",
+    \"encrypt\": \"$ssencrypt\",
+    \"username\": \"$flag_c\",
+    \"list_file\": \"$flag_c.txt\",
+    \"balance\": \"$flag_d\",
+    \"cdn_host\": \"$flag_d\"
+  }"
+  echo "$conf_json" >> "$gost_conf_path"
 }
-function eachconf_retrieve() {
-  d_server=${trans_conf#*#}
-  d_port=${d_server#*#}
-  d_ip=${d_server%#*}
-  flag_s_port=${trans_conf%%#*}
-  s_port=${flag_s_port#*/}
-  is_encrypt=${flag_s_port%/*}
+function confend() {
+  echo -e "\n    ]
+}" >> "$gost_conf_path"
 }
-function confstart() {
-  echo "{
-    \"Debug\": true,
-    \"Retries\": 0,
-    \"ServeNodes\": [" >>$gost_conf_path
-}
-function multiconfstart() {
-  echo "        {
-            \"Retries\": 0,
-            \"ServeNodes\": [" >>$gost_conf_path
-}
+
+
+
+
+
 function conflast() {
   echo "    ]
 }" >>$gost_conf_path
@@ -430,31 +467,35 @@ function multiconflast() {
         }," >>$gost_conf_path
   fi
 }
+
+
+
+
 function encrypt() {
-  echo -e "请问您要设置的转发传输类型: "
-  echo -e "-----------------------------------"
-  echo -e "[1] tls隧道"
-  echo -e "[2] ws隧道"
-  echo -e "[3] wss隧道"
-  echo -e "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认开启tcp+udp"
-  echo -e "-----------------------------------"
+  printf "%s\n" "请问您要设置的转发传输类型: "
+  printf "%s\n" "-----------------------------------"
+  printf "%s\n" "[1] tls隧道"
+  printf "%s\n" "[2] ws隧道"
+  printf "%s\n" "[3] wss隧道"
+  printf "%s\n" "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认开启tcp+udp"
+  printf "%s\n" "-----------------------------------"
   read -p "请选择转发传输类型: " numencrypt
 
   if [ "$numencrypt" == "1" ]; then
     flag_a="encrypttls"
-    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
-    read -e -p "落地机是否开启了自定义tls证书？[y/n]:" is_cert
   elif [ "$numencrypt" == "2" ]; then
     flag_a="encryptws"
   elif [ "$numencrypt" == "3" ]; then
     flag_a="encryptwss"
-    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
-    read -e -p "落地机是否开启了自定义tls证书？[y/n]:" is_cert
   else
-    echo "type error, please try again"
+    printf "%s\n" "type error, please try again"
     exit
   fi
 }
+
+
+
+
 function enpeer() {
   echo -e "请问您要设置的均衡负载传输类型: "
   echo -e "-----------------------------------"
@@ -464,7 +505,7 @@ function enpeer() {
   echo -e "[4] wss隧道"
   echo -e "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认同一配置的传输类型相同"
   echo -e "此脚本仅支持简单型均衡负载，具体可参考官方文档"
-  echo -e "gost均衡负载官方文档：https://docs.ginuerzh.xyz/gost/load-balancing"
+  echo -e "gost均衡负载官方文档：/gost/load-balancing"
   echo -e "-----------------------------------"
   read -p "请选择转发传输类型: " numpeer
 
@@ -482,6 +523,10 @@ function enpeer() {
     exit
   fi
 }
+
+
+
+
 function cdn() {
   echo -e "请问您要设置的CDN传输类型: "
   echo -e "-----------------------------------"
@@ -792,6 +837,9 @@ function method() {
   fi
 }
 
+
+
+
 function writeconf() {
   count_line=$(awk 'END{print NR}' $raw_conf_path)
   for ((i = 1; i <= $count_line; i++)); do
@@ -818,6 +866,10 @@ function writeconf() {
     fi
   done
 }
+
+
+
+
 function show_all_conf() {
   echo -e "                      GOST peykarbandi                        "
   echo -e "--------------------------------------------------------"
