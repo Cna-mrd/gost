@@ -65,8 +65,9 @@ function check_sys() {
 
 
 function Installation_dependency() {
-  gzip_ver=$(gzip -V)
-  if [[ -z ${gzip_ver} ]]; then
+  # اجرای دستور gzip -V و بررسی وجود آن
+  if ! gzip -V >/dev/null 2>&1; then
+    # در صورت نبود gzip، نصب وابستگی‌ها
     if [[ ${release} == "centos" ]]; then
       yum update
       yum install -y gzip wget
@@ -76,33 +77,42 @@ function Installation_dependency() {
     fi
   fi
 }
+
+
+
 function check_root() {
-  [[ $EUID != 0 ]] && echo -e "${Error} hesab root nist(user root nist)，nemitavan edame dad，lotfan az root estefade konid ${Green_background_prefix}sudo su${Font_color_suffix} shayad az shoma hesab root va ramz bekhahad" && exit 1
+  if [[ $EUID != 0 ]]; then
+    echo -e "${Error} Shoma ba hesab karbari hastid, baraye edame bayad az hesab root estefade konid ${Green_background_prefix}sudo su${Font_color_suffix}"
+    exit 1
+  fi
 }
+
 function check_new_ver() {
-  # deprecated
-  ct_new_ver=$(wget --no-check-certificate -qO- -t2 -T3 https://api.github.com/repos/ginuerzh/gost/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g;s/v//g')
+  # دریافت آخرین نسخه با استفاده از دستور curl
+  ct_new_ver=$(curl --silent "https://api.github.com/repos/ginuerzh/gost/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
   if [[ -z ${ct_new_ver} ]]; then
     ct_new_ver="2.11.2"
-    echo -e "${Error} gost akharin noskhe daryaft nashod，Downloading version v${ct_new_ver}"
+    echo -e "${Error} Akharin noskhe Avalin Bar Daryaft Neshod، Danlod az v${ct_new_ver}"
   else
-    echo -e "${Info} gost Currently the latest version is ${ct_new_ver}"
+    echo -e "${Info} Akharin noskhe Gost: ${ct_new_ver}"
   fi
 }
+
+
+
 function check_file() {
-  if test ! -d "/usr/lib/systemd/system/"; then
-    mkdir /usr/lib/systemd/system
-    chmod -R 777 /usr/lib/systemd/system
+  if [[ ! -d "/usr/lib/systemd/system/" ]]; then
+    mkdir -p /usr/lib/systemd/system/
+    chmod 777 /usr/lib/systemd/system/
   fi
 }
+
 function check_nor_file() {
-  rm -rf "$(pwd)"/gost
-  rm -rf "$(pwd)"/gost.service
-  rm -rf "$(pwd)"/config.json
-  rm -rf /etc/gost
-  rm -rf /usr/lib/systemd/system/gost.service
-  rm -rf /usr/bin/gost
+  rm -f "$(pwd)/gost" "$(pwd)/gost.service" "$(pwd)/config.json"
+  rm -rf /etc/gost /usr/lib/systemd/system/gost.service /usr/bin/gost
 }
+
+
 function Install_ct() {
   check_root
   check_nor_file
@@ -110,68 +120,64 @@ function Install_ct() {
   check_file
   check_sys
   # check_new_ver
-  echo -e "If it is a domestic machine, it is recommended to use the mainland mirror to speed up the download"
-  read -e -p "estefade konid ya na？[y/n]:" addyn
+  read -e -p "Are you in China? It is recommended to use domestic mirrors for faster download speeds. [y/n]: " addyn
   [[ -z ${addyn} ]] && addyn="n"
-  if [[ ${addyn} == [Yy] ]]; then
-    rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
-	wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v2.11.2/gost-linux-amd64-2.11.2.gz
-    gunzip gost-linux-"$bit"-"$ct_new_ver".gz
-    mv gost-linux-"$bit"-"$ct_new_ver" gost
-    mv gost /usr/bin/gost
-    chmod -R 777 /usr/bin/gost
-	wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
-	mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
+  if [[ ${addyn} =~ [Yy] ]]; then
+    curl -L -o gost-linux-amd64.gz http://openresty.tengine.taobao.org/download/gost-linux-amd64-latest.gz
   else
-    rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
-	wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v2.11.2/gost-linux-amd64-2.11.2.gz
-    gunzip gost-linux-"$bit"-"$ct_new_ver".gz
-    mv gost-linux-"$bit"-"$ct_new_ver" gost
-    mv gost /usr/bin/gost
-    chmod -R 777 /usr/bin/gost
-	
-    wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
-    mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
- fi
-
-  systemctl enable gost && systemctl restart gost
+    curl -L -o gost-linux-amd64.gz https://github.com/ginuerzh/gost/releases/download/v2.11.2/gost-linux-amd64-2.11.2.gz
+  fi
+  gzip -d gost-linux-amd64.gz
+  mv gost-linux-amd64 /usr/bin/gost
+  chmod 777 /usr/bin/gost
+  
+  curl -L -o gost.service https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.service
+  chmod 644 gost.service
+  mv gost.service /usr/lib/systemd/system/
+  
+  mkdir /etc/gost
+  curl -L -o /etc/gost/config.json https://raw.githubusercontent.com/Cna-mrd/gost/master/config.json
+  chmod 777 /etc/gost
+  
+  systemctl daemon-reload
+  systemctl enable gost.service
+  systemctl restart gost.service
+  
   echo "------------------------------"
-  if test -a /usr/bin/gost -a /usr/lib/systemctl/gost.service -a /etc/gost/config.json; then
-    echo "gost ba movafaghiyat nasb shod"
-    rm -rf "$(pwd)"/gost
-    rm -rf "$(pwd)"/gost.service
-    rm -rf "$(pwd)"/config.json
+  if [[ -e /usr/bin/gost && -e /usr/lib/systemctl/gost.service && -e /etc/gost/config.json ]]; then
+    echo "Gost has been installed successfully."
+    rm -rf "$(pwd)/gost" "$(pwd)/gost.service" "$(pwd)/config.json"
   else
-    echo "gost nasb nashod"
-    rm -rf "$(pwd)"/gost
-    rm -rf "$(pwd)"/gost.service
-    rm -rf "$(pwd)"/config.json
-    rm -rf "$(pwd)"/gost.sh
+    echo "Gost installation failed."
+    rm -rf "$(pwd)/gost" "$(pwd)/gost.service" "$(pwd)/config.json" "$(pwd)/gost.sh"
   fi
 }
+
+
+
+
+
 function Uninstall_ct() {
-  rm -rf /usr/bin/gost
-  rm -rf /usr/lib/systemd/system/gost.service
-  rm -rf /etc/gost
-  rm -rf "$(pwd)"/gost.sh
-  echo "gost hazf shod"
+  systemctl stop gost.service
+  systemctl disable gost.service
+  rm -rf /usr/bin/gost /usr/lib/systemd/system/gost.service /etc/gost "$(pwd)/gost.sh"
+  echo "Gost has been uninstalled."
 }
 function Start_ct() {
-  systemctl start gost
-  echo "faal shod"
+  systemctl start gost.service
+  echo "Gost has been started."
 }
 function Stop_ct() {
-  systemctl stop gost
-  echo "motevaghef shod"
+  systemctl stop gost.service
+  echo "Gost has been stopped."
 }
 function Restart_ct() {
-  rm -rf /etc/gost/config.json
-  confstart
-  writeconf
-  conflast
-  systemctl restart gost
-  echo "peykar bandi ra dobare bekhanid va rah andazi konid"
+  systemctl restart gost.service
+  echo "Please check the log to verify whether the restart was successful."
 }
+
+
+
 function read_protocol() {
   echo -e "che noe tabei ra tanzim mikonid: "
   echo -e "-----------------------------------"
@@ -214,6 +220,9 @@ function read_protocol() {
     exit
   fi
 }
+
+
+
 function read_s_port() {
   if [ "$flag_a" == "ss" ]; then
     echo -e "-----------------------------------"
