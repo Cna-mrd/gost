@@ -6,22 +6,35 @@ shell_version="1.1.1"
 ct_new_ver="2.11.2" # 2.x donbal nakardan berozresani
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
+
 function checknew() {
-  checknew=$(gost -V 2>&1 | awk '{print $2}')
-  # check_new_ver
-  echo "behtarin noskhe:""$checknew"""
-  echo -n berozresani?\(y/n\)\:
-  read checknewnum
-  if test $checknewnum = "y"; then
+  # استفاده از دستور gost --version برای دریافت نسخه
+  checknew=$(gost --version 2>&1 | awk '{print $2}')
+  
+  # چاپ پیام
+  echo "Behtarin noskhe: $checknew"
+  read -p "Berozresani? (y/n): " checknewnum
+  
+  # اجرای دستورات بروزرسانی
+  if [[ $checknewnum == [yY] ]]; then
+    # ایجاد یک نسخه پشتیبان از تنظیمات gost
     cp -r /etc/gost /tmp/
+    
+    # اجرای فانکشن ارتقا
     Install_ct
+    
+    # حذف نسخه قدیمی و جابجایی نسخه جدید
     rm -rf /etc/gost
     mv /tmp/gost /etc/
+    
+    # راه‌اندازی مجدد سرویس gost
     systemctl restart gost
   else
     exit 0
   fi
 }
+
+
 function check_sys() {
   if [[ -f /etc/redhat-release ]]; then
     release="centos"
