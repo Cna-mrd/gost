@@ -179,46 +179,56 @@ function Restart_ct() {
 
 
 function read_protocol() {
-  echo -e "che noe tabei ra tanzim mikonid: "
-  echo -e "-----------------------------------"
-  echo -e "[1] tcp+udp ersale terafik bedon ramznegari"
-  echo -e "namayesh: tranzite dakheli"
-  echo -e "-----------------------------------"
-  echo -e "[2] haml va naghle trafik tonel zamznegari"
-  echo -e "namayesh: Used to forward traffic that was originally encrypted at a lower level, tranzite dakheli"
-  echo -e "     entekhab in protokol be mani in ast shoma baraye daryaft in trafik ramzgozari shode, sepas protokol bayad roye an tanzim shavad[3]langar andakhtan"
-  echo -e "-----------------------------------"
-  echo -e "[3] Decrypt the traffic transmitted by gost and forward it"
-  echo -e "namayesh: For traffic encrypted by gost, Use this option to decrypt and forward to the proxy service port of this machine or forward to other remote machines"
-  echo -e "      It is generally set on foreign machines used to receive transit traffic"
-  echo -e "-----------------------------------"
-  echo -e "[4] One-click install ss/socks5/http proxy"
-  echo -e "namayesh: Use gost's built-in proxy protocol，Lightweight and easy to manage"
-  echo -e "-----------------------------------"
-  echo -e "[5] pishrafte ：Multiple landings to balance the load"
-  echo -e "namayesh: Simple load balancing that supports various encryption methods"
-  echo -e "-----------------------------------"
-  echo -e "[6] pishrafte ：Forwarding CDN self-selected nodes"
-  echo -e "namayesh: Just set up in transit"
-  echo -e "-----------------------------------"
-  read -p "lotfan entekhab konid: " numprotocol
+  cat <<EOF
+Choose a protocol:
+-----------------------------------
+[1] Non-encrypted TCP+UDP traffic forwarding
+     Use for internal traffic forwarding
+-----------------------------------
+[2] Encrypted TCP+UDP traffic forwarding
+     Use for forwarding traffic originally encrypted at lower levels, such as HTTPS
+     Choose this protocol if you want to receive and decrypt encrypted traffic, then forward to another node or service
+-----------------------------------
+[3] Decrypt the traffic transmitted by gost and forward it
+     Use for traffic encrypted by gost. Decrypt and forward to a local proxy service port or forward to a remote node.
+     Generally used to receive transit traffic from a foreign machine.
+-----------------------------------
+[4] One-click installation of a ss/socks5/http proxy
+     Uses Gost's built-in proxy protocol. Lightweight and easy to manage.
+-----------------------------------
+[5] Load balancing with multiple endpoints
+     Supports various encryption methods.
+-----------------------------------
+[6] Forwarding to self-selected CDN nodes
+     Set up in transit only.
+-----------------------------------
+EOF
+  read -p "Please enter the protocol number: " numprotocol
 
-  if [ "$numprotocol" == "1" ]; then
-    flag_a="nonencrypt"
-  elif [ "$numprotocol" == "2" ]; then
-    encrypt
-  elif [ "$numprotocol" == "3" ]; then
-    decrypt
-  elif [ "$numprotocol" == "4" ]; then
-    proxy
-  elif [ "$numprotocol" == "5" ]; then
-    enpeer
-  elif [ "$numprotocol" == "6" ]; then
-    cdn
-  else
-    echo "type error, please try again"
-    exit
-  fi
+  case "$numprotocol" in
+    1)
+      flag_a="nonencrypt"
+      ;;
+    2)
+      encrypt
+      ;;
+    3)
+      decrypt
+      ;;
+    4)
+      proxy
+      ;;
+    5)
+      enpeer
+      ;;
+    6)
+      cdn
+      ;;
+    *)
+      echo "Invalid input. Please try again."
+      exit 1
+      ;;
+  esac
 }
 
 
