@@ -248,36 +248,32 @@ function read_s_port() {
 
 
 
-function read_d_ip() {
-  if [ "$flag_a" == "ss" ]; then
-    echo -e "------------------------------------------------------------------"
-    echo -e "May I ask the ss encryption you want to set(Only a few commonly used): "
-    echo -e "-----------------------------------"
-    echo -e "[1] aes-256-gcm"
-    echo -e "[2] aes-256-cfb"
-    echo -e "[3] chacha20-ietf-poly1305"
-    echo -e "[4] chacha20"
-    echo -e "[5] rc4-md5"
-    echo -e "[6] AEAD_CHACHA20_POLY1305"
-    echo -e "-----------------------------------"
-    read -p "Please choose ss encryption method: " ssencrypt
+function read_options() {
+  local options=("$@")
+  for i in "${!options[@]}"; do
+    echo "[$(($i+1))] ${options[$i]}"
+  done
+  echo "-----------------------------------"
+  read -p "Please enter your choice: " choice
+  while [[ -z "$choice" || "$choice" -gt "${#options[@]}" || "$choice" -lt 1 ]]; do
+    echo "Invalid input. Please try again."
+    read -p "Please enter your choice: " choice
+  done
+  echo ${options[$(($choice-1))]}
+}
 
-    if [ "$ssencrypt" == "1" ]; then
-      flag_c="aes-256-gcm"
-    elif [ "$ssencrypt" == "2" ]; then
-      flag_c="aes-256-cfb"
-    elif [ "$ssencrypt" == "3" ]; then
-      flag_c="chacha20-ietf-poly1305"
-    elif [ "$ssencrypt" == "4" ]; then
-      flag_c="chacha20"
-    elif [ "$ssencrypt" == "5" ]; then
-      flag_c="rc4-md5"
-    elif [ "$ssencrypt" == "6" ]; then
-      flag_c="AEAD_CHACHA20_POLY1305"
-    else
-      echo "type error, please try again"
-      exit
-    fi
+# Function to read dynamic IP
+function read_d_ip() {
+  # Reading user options for the ss encryption method
+  if [ "$flag_a" == "ss" ]; then
+    echo "------------------------------------------------------------------"
+    echo "May I ask the ss encryption you want to set (Only a few commonly used): "
+    options=("aes-256-gcm" "aes-256-cfb" "chacha20-ietf-poly1305" "chacha20" "rc4-md5" "AEAD_CHACHA20_POLY1305")
+    flag_c=$(read_options "${options[@]}")
+  fi
+  
+  
+  
   elif [ "$flag_a" == "socks" ]; then
     echo -e "-----------------------------------"
     read -p "Please enter the socks username: " flag_c
@@ -309,6 +305,9 @@ function read_d_ip() {
         echo -e "------------------------------------------------------------------"
         echo -e "Continue to add balanced load landing configuration"
       fi
+	  
+	  
+	  
     done
   elif [[ "$flag_a" == "cdn"* ]]; then
     echo -e "------------------------------------------------------------------"
