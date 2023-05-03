@@ -379,7 +379,7 @@ function read_d_port() {
         "3")
           flag_d="fifo"
           ;;
-        )
+        
           echo "Type error, please try again"
           exit
           ;;
