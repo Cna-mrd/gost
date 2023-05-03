@@ -6,68 +6,49 @@ shell_version="1.1.1"
 ct_new_ver="2.11.2" # 2.x donbal nakardan berozresani
 gost_conf_path="/etc/gost/config.json"
 raw_conf_path="/etc/gost/rawconf"
-
 function checknew() {
-  # استفاده از دستور gost --version برای دریافت نسخه
-  checknew=$(gost --version 2>&1 | awk '{print $2}')
-  
-  # چاپ پیام
-  echo "Behtarin noskhe: $checknew"
-  read -p "Berozresani? (y/n): " checknewnum
-  
-  # اجرای دستورات بروزرسانی
-  if [[ $checknewnum == [yY] ]]; then
-    # ایجاد یک نسخه پشتیبان از تنظیمات gost
+  checknew=$(gost -V 2>&1 | awk '{print $2}')
+  # check_new_ver
+  echo "behtarin noskhe:""$checknew"""
+  echo -n berozresani?\(y/n\)\:
+  read checknewnum
+  if test $checknewnum = "y"; then
     cp -r /etc/gost /tmp/
-    
-    # اجرای فانکشن ارتقا
     Install_ct
-    
-    # حذف نسخه قدیمی و جابجایی نسخه جدید
     rm -rf /etc/gost
     mv /tmp/gost /etc/
-    
-    # راه‌اندازی مجدد سرویس gost
     systemctl restart gost
   else
     exit 0
   fi
 }
-
-
 function check_sys() {
-  # چک کردن توزیع لینوکسی
   if [[ -f /etc/redhat-release ]]; then
     release="centos"
-  elif grep -q -E -i "debian" /etc/issue; then
+  elif cat /etc/issue | grep -q -E -i "debian"; then
     release="debian"
-  elif grep -q -E -i "ubuntu" /etc/issue; then
+  elif cat /etc/issue | grep -q -E -i "ubuntu"; then
     release="ubuntu"
-  elif grep -q -E -i "centos|red hat|redhat" /etc/issue; then
+  elif cat /etc/issue | grep -q -E -i "centos|red hat|redhat"; then
     release="centos"
-  elif grep -q -E -i "debian" /proc/version; then
+  elif cat /proc/version | grep -q -E -i "debian"; then
     release="debian"
-  elif grep -q -E -i "ubuntu" /proc/version; then
+  elif cat /proc/version | grep -q -E -i "ubuntu"; then
     release="ubuntu"
-  elif grep -q -E -i "centos|red hat|redhat" /proc/version; then
+  elif cat /proc/version | grep -q -E -i "centos|red hat|redhat"; then
     release="centos"
   fi
-  
-  # چک کردن معماری CPU
   bit=$(uname -m)
-  if [[ "$bit" != "x86_64" ]]; then
-    read -p "Tarashe CPU khod ra entekhab konid: " bit
+  if test "$bit" != "x86_64"; then
+    echo "tarashe cpu khod ra entekhab konid，/386/armv5/armv6/armv7/armv8"
+    read bit
   else
     bit="amd64"
   fi
 }
-
-
-
 function Installation_dependency() {
-  # اجرای دستور gzip -V و بررسی وجود آن
-  if ! gzip -V >/dev/null 2>&1; then
-    # در صورت نبود gzip، نصب وابستگی‌ها
+  gzip_ver=$(gzip -V)
+  if [[ -z ${gzip_ver} ]]; then
     if [[ ${release} == "centos" ]]; then
       yum update
       yum install -y gzip wget
@@ -77,42 +58,33 @@ function Installation_dependency() {
     fi
   fi
 }
-
-
-
 function check_root() {
-  if [[ $EUID != 0 ]]; then
-    echo -e "${Error} Shoma ba hesab karbari hastid, baraye edame bayad az hesab root estefade konid ${Green_background_prefix}sudo su${Font_color_suffix}"
-    exit 1
-  fi
+  [[ $EUID != 0 ]] && echo -e "${Error} hesab root nist(user root nist)，nemitavan edame dad，lotfan az root estefade konid ${Green_background_prefix}sudo su${Font_color_suffix} shayad az shoma hesab root va ramz bekhahad" && exit 1
 }
-
 function check_new_ver() {
-  # دریافت آخرین نسخه با استفاده از دستور curl
-  ct_new_ver=$(curl --silent "https://api.github.com/repos/ginuerzh/gost/releases/latest" | grep -Po '"tag_name": "\K.*?(?=")')
+  # deprecated
+  ct_new_ver=$(wget --no-check-certificate -qO- -t2 -T3 https://api.github.com/repos/ginuerzh/gost/releases/latest | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g;s/v//g')
   if [[ -z ${ct_new_ver} ]]; then
     ct_new_ver="2.11.2"
-    echo -e "${Error} Akharin noskhe Avalin Bar Daryaft Neshod، Danlod az v${ct_new_ver}"
+    echo -e "${Error} gost akharin noskhe daryaft nashod，Downloading version v${ct_new_ver}"
   else
-    echo -e "${Info} Akharin noskhe Gost: ${ct_new_ver}"
+    echo -e "${Info} gost Currently the latest version is ${ct_new_ver}"
   fi
 }
-
-
-
 function check_file() {
-  if [[ ! -d "/usr/lib/systemd/system/" ]]; then
-    mkdir -p /usr/lib/systemd/system/
-    chmod 777 /usr/lib/systemd/system/
+  if test ! -d "/usr/lib/systemd/system/"; then
+    mkdir /usr/lib/systemd/system
+    chmod -R 777 /usr/lib/systemd/system
   fi
 }
-
 function check_nor_file() {
-  rm -f "$(pwd)/gost" "$(pwd)/gost.service" "$(pwd)/config.json"
-  rm -rf /etc/gost /usr/lib/systemd/system/gost.service /usr/bin/gost
+  rm -rf "$(pwd)"/gost
+  rm -rf "$(pwd)"/gost.service
+  rm -rf "$(pwd)"/config.json
+  rm -rf /etc/gost
+  rm -rf /usr/lib/systemd/system/gost.service
+  rm -rf /usr/bin/gost
 }
-
-
 function Install_ct() {
   check_root
   check_nor_file
@@ -120,134 +92,126 @@ function Install_ct() {
   check_file
   check_sys
   # check_new_ver
-  read -e -p "Are you in China? It is recommended to use domestic mirrors for faster download speeds. [y/n]: " addyn
+  echo -e "If it is a domestic machine, it is recommended to use the mainland mirror to speed up the download"
+  read -e -p "estefade konid ya na？[y/n]:" addyn
   [[ -z ${addyn} ]] && addyn="n"
-  if [[ ${addyn} =~ [Yy] ]]; then
-    curl -L -o gost-linux-amd64.gz https://github.com/ginuerzh/gost/releases/download/v2.11.5/gost-freebsd-amd64-2.11.5.gz
+  if [[ ${addyn} == [Yy] ]]; then
+    rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
+	wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v2.11.2/gost-linux-amd64-2.11.2.gz
+    gunzip gost-linux-"$bit"-"$ct_new_ver".gz
+    mv gost-linux-"$bit"-"$ct_new_ver" gost
+    mv gost /usr/bin/gost
+    chmod -R 777 /usr/bin/gost
+	wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
+	mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
   else
-    curl -L -o gost-linux-amd64.gz https://github.com/go-gost/gost/releases/download/v3.0.0-rc7/gost_3.0.0-rc7_linux_amd64.tar.gz
-  fi
-  gzip -d gost-linux-amd64.gz
-  mv gost-linux-amd64 /usr/bin/gost
-  chmod 777 /usr/bin/gost
-  
-  curl -L -o gost.service https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.service
-  chmod 644 gost.service
-  mv gost.service /usr/lib/systemd/system/
-  
-  mkdir /etc/gost
-  curl -L -o /etc/gost/config.json https://raw.githubusercontent.com/Cna-mrd/gost/master/config.json
-  chmod 777 /etc/gost
-  
-  systemctl daemon-reload
-  systemctl enable gost.service
-  systemctl restart gost.service
-  
+    rm -rf gost-linux-"$bit"-"$ct_new_ver".gz
+	wget --no-check-certificate https://github.com/ginuerzh/gost/releases/download/v2.11.2/gost-linux-amd64-2.11.2.gz
+    gunzip gost-linux-"$bit"-"$ct_new_ver".gz
+    mv gost-linux-"$bit"-"$ct_new_ver" gost
+    mv gost /usr/bin/gost
+    chmod -R 777 /usr/bin/gost
+	
+    wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/gost.service && chmod -R 777 gost.service && mv gost.service /usr/lib/systemd/system
+    mkdir /etc/gost && wget --no-check-certificate https://raw.githubusercontent.com/Cna-mrd/gost/master/config.json && mv config.json /etc/gost && chmod -R 777 /etc/gost
+ fi
+
+  systemctl enable gost && systemctl restart gost
   echo "------------------------------"
-  if [[ -e /usr/bin/gost && -e /usr/lib/systemctl/gost.service && -e /etc/gost/config.json ]]; then
-    echo "Gost has been installed successfully."
-    rm -rf "$(pwd)/gost" "$(pwd)/gost.service" "$(pwd)/config.json"
+  if test -a /usr/bin/gost -a /usr/lib/systemctl/gost.service -a /etc/gost/config.json; then
+    echo "gost ba movafaghiyat nasb shod"
+    rm -rf "$(pwd)"/gost
+    rm -rf "$(pwd)"/gost.service
+    rm -rf "$(pwd)"/config.json
   else
-    echo "Gost installation failed."
-    rm -rf "$(pwd)/gost" "$(pwd)/gost.service" "$(pwd)/config.json" "$(pwd)/gost.sh"
+    echo "gost nasb nashod"
+    rm -rf "$(pwd)"/gost
+    rm -rf "$(pwd)"/gost.service
+    rm -rf "$(pwd)"/config.json
+    rm -rf "$(pwd)"/gost.sh
   fi
 }
-
-
-
-
-
 function Uninstall_ct() {
-  systemctl stop gost.service
-  systemctl disable gost.service
-  rm -rf /usr/bin/gost /usr/lib/systemd/system/gost.service /etc/gost "$(pwd)/gost.sh"
-  echo "Gost has been uninstalled."
+  rm -rf /usr/bin/gost
+  rm -rf /usr/lib/systemd/system/gost.service
+  rm -rf /etc/gost
+  rm -rf "$(pwd)"/gost.sh
+  echo "gost hazf shod"
 }
 function Start_ct() {
-  systemctl start gost.service
-  echo "Gost has been started."
+  systemctl start gost
+  echo "faal shod"
 }
 function Stop_ct() {
-  systemctl stop gost.service
-  echo "Gost has been stopped."
+  systemctl stop gost
+  echo "motevaghef shod"
 }
 function Restart_ct() {
-  systemctl restart gost.service
-  echo "Please check the log to verify whether the restart was successful."
+  rm -rf /etc/gost/config.json
+  confstart
+  writeconf
+  conflast
+  systemctl restart gost
+  echo "peykar bandi ra dobare bekhanid va rah andazi konid"
 }
-
-
-
 function read_protocol() {
-  cat <<EOF
-Choose a protocol:
------------------------------------
-[1] Non-encrypted TCP+UDP traffic forwarding
-     Use for internal traffic forwarding
------------------------------------
-[2] Encrypted TCP+UDP traffic forwarding
-     Use for forwarding traffic originally encrypted at lower levels, such as HTTPS
-     Choose this protocol if you want to receive and decrypt encrypted traffic, then forward to another node or service
------------------------------------
-[3] Decrypt the traffic transmitted by gost and forward it
-     Use for traffic encrypted by gost. Decrypt and forward to a local proxy service port or forward to a remote node.
-     Generally used to receive transit traffic from a foreign machine.
------------------------------------
-[4] One-click installation of a ss/socks5/http proxy
-     Uses Gost's built-in proxy protocol. Lightweight and easy to manage.
------------------------------------
-[5] Load balancing with multiple endpoints
-     Supports various encryption methods.
------------------------------------
-[6] Forwarding to self-selected CDN nodes
-     Set up in transit only.
------------------------------------
-EOF
-  read -p "Please enter the protocol number: " numprotocol
+  echo -e "che noe tabei ra tanzim mikonid: "
+  echo -e "-----------------------------------"
+  echo -e "[1] tcp+udp ersale terafik bedon ramznegari"
+  echo -e "namayesh: tranzite dakheli"
+  echo -e "-----------------------------------"
+  echo -e "[2] haml va naghle trafik tonel zamznegari"
+  echo -e "namayesh: Used to forward traffic that was originally encrypted at a lower level, tranzite dakheli"
+  echo -e "     entekhab in protokol be mani in ast shoma baraye daryaft in trafik ramzgozari shode, sepas protokol bayad roye an tanzim shavad[3]langar andakhtan"
+  echo -e "-----------------------------------"
+  echo -e "[3] Decrypt the traffic transmitted by gost and forward it"
+  echo -e "namayesh: For traffic encrypted by gost, Use this option to decrypt and forward to the proxy service port of this machine or forward to other remote machines"
+  echo -e "      It is generally set on foreign machines used to receive transit traffic"
+  echo -e "-----------------------------------"
+  echo -e "[4] One-click install ss/socks5/http proxy"
+  echo -e "namayesh: Use gost's built-in proxy protocol，Lightweight and easy to manage"
+  echo -e "-----------------------------------"
+  echo -e "[5] pishrafte ：Multiple landings to balance the load"
+  echo -e "namayesh: Simple load balancing that supports various encryption methods"
+  echo -e "-----------------------------------"
+  echo -e "[6] pishrafte ：Forwarding CDN self-selected nodes"
+  echo -e "namayesh: Just set up in transit"
+  echo -e "-----------------------------------"
+  read -p "lotfan entekhab konid: " numprotocol
 
-  case "$numprotocol" in
-    1)
-      flag_a="nonencrypt"
-      ;;
-    2)
-      encrypt
-      ;;
-    3)
-      decrypt
-      ;;
-    4)
-      proxy
-      ;;
-    5)
-      enpeer
-      ;;
-    6)
-      cdn
-      ;;
-    *)
-      echo "Invalid input. Please try again."
-      exit 1
-      ;;
-  esac
+  if [ "$numprotocol" == "1" ]; then
+    flag_a="nonencrypt"
+  elif [ "$numprotocol" == "2" ]; then
+    encrypt
+  elif [ "$numprotocol" == "3" ]; then
+    decrypt
+  elif [ "$numprotocol" == "4" ]; then
+    proxy
+  elif [ "$numprotocol" == "5" ]; then
+    enpeer
+  elif [ "$numprotocol" == "6" ]; then
+    cdn
+  else
+    echo "type error, please try again"
+    exit
+  fi
 }
-
-
-
 function read_s_port() {
-  case "$flag_a" in
-    ss|socks|http)
-      echo "-----------------------------------"
-      read -p "Please enter the password for $flag_a: " flag_b
-      ;;
-    *)
-      echo "------------------------------------------------------------------"
-      read -p "Please enter the port to receive forwarded traffic: " flag_b
-      ;;
-   esac
+  if [ "$flag_a" == "ss" ]; then
+    echo -e "-----------------------------------"
+    read -p "please enter ss password: " flag_b
+  elif [ "$flag_a" == "socks" ]; then
+    echo -e "-----------------------------------"
+    read -p "Please enter the socks password: " flag_b
+  elif [ "$flag_a" == "http" ]; then
+    echo -e "-----------------------------------"
+    read -p "please enter http password: " flag_b
+  else
+    echo -e "------------------------------------------------------------------"
+    echo -e "kodam port ra mikhahid trafik daryafti tavasot in dastgah ra forward konid ?"
+    read -p "lotfan vared konid: " flag_b
+  fi
 }
-
-
-
 function read_d_ip() {
   if [ "$flag_a" == "ss" ]; then
     echo -e "------------------------------------------------------------------"
@@ -261,6 +225,7 @@ function read_d_ip() {
     echo -e "[6] AEAD_CHACHA20_POLY1305"
     echo -e "-----------------------------------"
     read -p "Please choose ss encryption method: " ssencrypt
+
     if [ "$ssencrypt" == "1" ]; then
       flag_c="aes-256-gcm"
     elif [ "$ssencrypt" == "2" ]; then
@@ -311,19 +276,19 @@ function read_d_ip() {
     done
   elif [[ "$flag_a" == "cdn"* ]]; then
     echo -e "------------------------------------------------------------------"
-    echo -e "Change the unit from${flag_b}The self-selected ip to which the received traffic is forwarded:"
-    read -p "please enter: " flag_c
-    echo -e "Would you like to switch this unit from${flag_b}Received traffic is forwarded to${flag_c}Which port of?"
+    echo -e "将本机从${flag_b}接收到的流量转发向的自选ip:"
+    read -p "请输入: " flag_c
+    echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
     echo -e "[1] 80"
     echo -e "[2] 443"
-    echo -e "[3]Custom port (such as 8080, etc.)"
-    read -p "Please select a port: " cdnport
+    echo -e "[3] 自定义端口（如8080等）"
+    read -p "请选择端口: " cdnport
     if [ "$cdnport" == "1" ]; then
       flag_c="$flag_c:80"
     elif [ "$cdnport" == "2" ]; then
       flag_c="$flag_c:443"
     elif [ "$cdnport" == "3" ]; then
-      read -p "Please enter a custom port: " customport
+      read -p "请输入自定义端口: " customport
       flag_c="$flag_c:$customport"
     else
       echo "type error, please try again"
@@ -331,129 +296,89 @@ function read_d_ip() {
     fi
   else
     echo -e "------------------------------------------------------------------"
-    echo -e "May I ask which IP or domain name you want to forward the traffic received by this machine from ${flag_b}?"
-    echo -e "Note: The IP can be either the public network IP of [remote machine/current machine], or the local loopback IP of this machine (ie 127.0.0.1)"
-    echo -e "Filling in the specific IP address depends on the IP that the service receiving the traffic is listening to (see: /Cna-mrd/gost)"
+    echo -e "请问你要将本机从${flag_b}接收到的流量转发向哪个IP或域名?"
+    echo -e "注: IP既可以是[远程机器/当前机器]的公网IP, 也可是以本机本地回环IP(即127.0.0.1)"
+    echo -e "具体IP地址的填写, 取决于接收该流量的服务正在监听的IP(详见: https://github.com/Cna-mrd/gost)"
     if [[ ${is_cert} == [Yy] ]]; then
-      echo -e "Note: The landing machine opens a custom tls certificate, be sure to fill in ${Red_font_prefix} domain name ${Font_color_suffix}"
+      echo -e "注意: 落地机开启自定义tls证书，务必填写${Red_font_prefix}域名${Font_color_suffix}"
     fi
-    read -p "please enter: " flag_c
+    read -p "请输入: " flag_c
   fi
 }
-
-
-
 function read_d_port() {
-  case "$flaga" in 
-    "ss")
-      printf "%s\n" "------------------------------------------------------------------" \
-        "May I ask which port you want to set for the SS proxy service?"
-      read -p "Please enter: " flagd
-      ;;
-    "socks")
-      printf "%s\n" "------------------------------------------------------------------" \
-        "May I ask which port you want to set for the SOCKS proxy service?"
-      read -p "Please enter: " flagd
-      ;;
-    "http")
-      printf "%s\n" "------------------------------------------------------------------" \
-        "May I ask which port you want to set for the HTTP proxy service?"
-      read -p "Please enter: " flagd
-      ;;
-    "peer")
-      printf "%s\n" "------------------------------------------------------------------" \
-        "Balancing load strategy: " \
-        "-----------------------------------" \
-        "[1] round - Round-robin" \
-        "[2] random - Random" \
-        "[3] fifo - First in, first out" \
-        "-----------------------------------"
-      read -p "Please select a load balancing type: " num_stra
-      case "$num_stra" in
-        "1")
-          flag_d="round"
-          ;;
-        "2")
-          flag_d="random"
-          ;;
-        "3")
-          flag_d="fifo"
-          ;;
-        
-          echo "Type error, please try again"
-          exit
-          ;;
-      esac
-      ;;
-    "cdn")
-      printf "%s\n" "------------------------------------------------------------------" \
-        "Please enter the host:"
-      read -p "Please enter: " flag_d
-      ;;
-    )
-      printf "%s\n" "------------------------------------------------------------------" \
-        "May I ask which port you want to forward the traffic received by this machine from ${flagb} to ${flagc}?"
-      read -p "Please enter: " flagd
-      if [[ ${iscert} == Yy ]]; then
-        flagd="$flagd?secure=true"
-      fi
-      ;;
-  esac
-}
+  if [ "$flag_a" == "ss" ]; then
+    echo -e "------------------------------------------------------------------"
+    echo -e "请问你要设置ss代理服务的端口?"
+    read -p "请输入: " flag_d
+  elif [ "$flag_a" == "socks" ]; then
+    echo -e "------------------------------------------------------------------"
+    echo -e "请问你要设置socks代理服务的端口?"
+    read -p "请输入: " flag_d
+  elif [ "$flag_a" == "http" ]; then
+    echo -e "------------------------------------------------------------------"
+    echo -e "请问你要设置http代理服务的端口?"
+    read -p "请输入: " flag_d
+  elif [[ "$flag_a" == "peer"* ]]; then
+    echo -e "------------------------------------------------------------------"
+    echo -e "您要设置的均衡负载策略: "
+    echo -e "-----------------------------------"
+    echo -e "[1] round - 轮询"
+    echo -e "[2] random - 随机"
+    echo -e "[3] fifo - 自上而下"
+    echo -e "-----------------------------------"
+    read -p "请选择均衡负载类型: " numstra
 
-
-
-function eachconf_retrieve() {
-  d_server=${trans_conf#*#}
-  d_port=${d_server#*#}
-  d_ip=${d_server%%:*}
-  flag_s_port=${trans_conf%%#*}
-  is_encrypt=${flag_s_port%/*}
-  s_port=${flag_s_port##*/}
-}
-
-function confstart() {
-  printf "%s\n" "{
-    \"Debug\": true,
-    \"Retries\": 0," > "$gost_conf_path"
-  if [ "$multiconf" = true ]; then
-    echo -e "    \"ServeNodes\": [" >> "$gost_conf_path"
+    if [ "$numstra" == "1" ]; then
+      flag_d="round"
+    elif [ "$numstra" == "2" ]; then
+      flag_d="random"
+    elif [ "$numstra" == "3" ]; then
+      flag_d="fifo"
+    else
+      echo "type error, please try again"
+      exit
+    fi
+  elif [[ "$flag_a" == "cdn"* ]]; then
+    echo -e "------------------------------------------------------------------"
+    read -p "请输入host:" flag_d
   else
-    echo -e "    \"ServeNodes\": [" >> "$gost_conf_path"
+    echo -e "------------------------------------------------------------------"
+    echo -e "请问你要将本机从${flag_b}接收到的流量转发向${flag_c}的哪个端口?"
+    read -p "请输入: " flag_d
+    if [[ ${is_cert} == [Yy] ]]; then
+      flag_d="$flag_d?secure=true"
+    fi
   fi
 }
-
+function writerawconf() {
+  echo $flag_a"/""$flag_b""#""$flag_c""#""$flag_d" >>$raw_conf_path
+}
 function rawconf() {
-  printf "%s\n\n" "+-----------------------------------+"
-  printf "%s\n" "| GOST Transport Layer Configuration |"
-  printf "%s\n\n" "+-----------------------------------+"
-  
   read_protocol
   read_s_port
   read_d_ip
   read_d_port
-  conf_json="{
-    \"protocol\": \"$flag_a\",
-    \"local_ip\": \"$flag_b\",
-    \"remote_ip\": \"$flag_c\",
-    \"remote_port\": \"$flag_d\",
-    \"encrypt\": \"$ssencrypt\",
-    \"username\": \"$flag_c\",
-    \"list_file\": \"$flag_c.txt\",
-    \"balance\": \"$flag_d\",
-    \"cdn_host\": \"$flag_d\"
-  }"
-  echo "$conf_json" >> "$gost_conf_path"
+  writerawconf
 }
-function confend() {
-  echo -e "\n    ]
-}" >> "$gost_conf_path"
+function eachconf_retrieve() {
+  d_server=${trans_conf#*#}
+  d_port=${d_server#*#}
+  d_ip=${d_server%#*}
+  flag_s_port=${trans_conf%%#*}
+  s_port=${flag_s_port#*/}
+  is_encrypt=${flag_s_port%/*}
 }
-
-
-
-
-
+function confstart() {
+  echo "{
+    \"Debug\": true,
+    \"Retries\": 0,
+    \"ServeNodes\": [" >>$gost_conf_path
+}
+function multiconfstart() {
+  echo "        {
+            \"Retries\": 0,
+            \"ServeNodes\": [" >>$gost_conf_path
+}
 function conflast() {
   echo "    ]
 }" >>$gost_conf_path
@@ -467,35 +392,31 @@ function multiconflast() {
         }," >>$gost_conf_path
   fi
 }
-
-
-
-
 function encrypt() {
-  printf "%s\n" "请问您要设置的转发传输类型: "
-  printf "%s\n" "-----------------------------------"
-  printf "%s\n" "[1] tls隧道"
-  printf "%s\n" "[2] ws隧道"
-  printf "%s\n" "[3] wss隧道"
-  printf "%s\n" "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认开启tcp+udp"
-  printf "%s\n" "-----------------------------------"
+  echo -e "请问您要设置的转发传输类型: "
+  echo -e "-----------------------------------"
+  echo -e "[1] tls隧道"
+  echo -e "[2] ws隧道"
+  echo -e "[3] wss隧道"
+  echo -e "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认开启tcp+udp"
+  echo -e "-----------------------------------"
   read -p "请选择转发传输类型: " numencrypt
 
   if [ "$numencrypt" == "1" ]; then
     flag_a="encrypttls"
+    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
+    read -e -p "落地机是否开启了自定义tls证书？[y/n]:" is_cert
   elif [ "$numencrypt" == "2" ]; then
     flag_a="encryptws"
   elif [ "$numencrypt" == "3" ]; then
     flag_a="encryptwss"
+    echo -e "注意: 选择 是 将针对落地的自定义证书开启证书校验保证安全性，稍后落地机务必填写${Red_font_prefix}域名${Font_color_suffix}"
+    read -e -p "落地机是否开启了自定义tls证书？[y/n]:" is_cert
   else
-    printf "%s\n" "type error, please try again"
+    echo "type error, please try again"
     exit
   fi
 }
-
-
-
-
 function enpeer() {
   echo -e "请问您要设置的均衡负载传输类型: "
   echo -e "-----------------------------------"
@@ -505,7 +426,7 @@ function enpeer() {
   echo -e "[4] wss隧道"
   echo -e "注意: 同一则转发，中转与落地传输类型必须对应！本脚本默认同一配置的传输类型相同"
   echo -e "此脚本仅支持简单型均衡负载，具体可参考官方文档"
-  echo -e "gost均衡负载官方文档：/gost/load-balancing"
+  echo -e "gost均衡负载官方文档：https://docs.ginuerzh.xyz/gost/load-balancing"
   echo -e "-----------------------------------"
   read -p "请选择转发传输类型: " numpeer
 
@@ -523,10 +444,6 @@ function enpeer() {
     exit
   fi
 }
-
-
-
-
 function cdn() {
   echo -e "请问您要设置的CDN传输类型: "
   echo -e "-----------------------------------"
@@ -837,9 +754,6 @@ function method() {
   fi
 }
 
-
-
-
 function writeconf() {
   count_line=$(awk 'END{print NR}' $raw_conf_path)
   for ((i = 1; i <= $count_line; i++)); do
@@ -866,10 +780,6 @@ function writeconf() {
     fi
   done
 }
-
-
-
-
 function show_all_conf() {
   echo -e "                      GOST peykarbandi                        "
   echo -e "--------------------------------------------------------"
